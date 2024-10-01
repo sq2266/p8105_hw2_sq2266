@@ -39,14 +39,6 @@ pivot_longer(
 print(transit_df)
 ```
 
-```{r}
-    transit_df = transit_df |>
-    mutate(
-      entry = ifelse("entry" == "YES",TRUE,FALSE)
-    ) 
-print(transit_df)
-
-```
 
 Description: 
 This dataset includes information of subway stations in New York City. Key variables includes `division`,`line`, `station_name`, `station_latitude`,`station_longitude`,`routes`, `entry`,`vending`,`entrance_type`, and `ada`. The data cleaning steps includes standardizing column names by using `janitor::clean_names` to make uppercase and lowercase separated, converting `entry` from a character variable to a logical variable. 
