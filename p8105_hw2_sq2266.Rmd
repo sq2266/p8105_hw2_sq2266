@@ -1,0 +1,64 @@
+---
+title: "p8105_hw2_sq2266"
+output: github_document
+---
+
+
+## create a subdirectory to store the local data files, and use relative paths to access these data files?
+
+```{r setup}
+library(tidyverse)
+library(readxl)
+```
+
+## Problem 1
+
+
+```{r}
+transit_df = read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv")
+transit_df = janitor::clean_names(transit_df)
+print(transit_df)
+```
+
+```{r}
+    select(transit_df,line,station_name, station_latitude, route1,route2,route3,route4,route5,route6,route7,route8,route9,route10, entry, vending, entrance_type, ada) |>
+
+print(transit_df)
+```
+
+```{r}
+    transit_df = transit_df |>
+    mutate(
+      entry = ifelse("entry" == "YES",TRUE,FALSE)
+    ) 
+print(transit_df)
+
+```
+
+Description: 
+This dataset includes information of subway stations in New York City. Key variables includes `division`,`line`, `station_name`, `station_latitude`,`station_longitude`,`routes`, `entry`,`vending`,`entrance_type`, and `ada`. The data cleaning steps includes standardizing column names by using `janitor::clean_names` to make uppercase and lowercase separated, converting `entry` from a character variable to a logical variable. 
+
+```{r}
+transit_df = transit_df |>
+      distinct("station_name", "line") |>
+  nrow()
+```
+
+```{r}
+ada_compliant_stations = transit_df |>
+  filter(ada == "YES") |>
+  distinct(station_name, line) |>
+  nrow()
+```
+
+```{r}
+entrance_df= transit_df |>
+  filter(vending == "NO") |>
+  pull(proportion)
+
+print(entrance_df)
+```
+
+
+
+
