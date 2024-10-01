@@ -119,5 +119,49 @@ Description:
 
 
 
+## Problem 3
+create a single, well-organized dataset with all the information contained in these data files
+```{r}
+bakers_df = 
+  read_csv("gbb_datasets/bakers.csv", na = c("NA",".",""))|>
+  janitor::clean_names()|>
+  rename(baker = baker_name)
+print(bakers_df)
+```
+
+```{r}
+bakes_df = 
+  read_csv("gbb_datasets/bakes.csv",na = c("NA",".",""))
+  janitor::clean_names()
+print(bakes_df)
+```
+
+
+```{r}
+results_df = 
+  read_csv("gbb_datasets/results.csv",na = c("NA",".","")) |>
+  janitor::clean_names() |>
+  rename(
+    result = in_stayed_in_out_eliminated_star_baker_star_baker_winner_series_winner_runner_up_series_runner_up_wd_withdrew
+    
+  )
+  
+print(results_df)
+```
+
+## combining datasets
+```{r}
+bakers_bakes_df = 
+  left_join(bakers_df, bakes_df, by = "baker")
+print(bakers_bakes_df)
+```
+
+```{r}
+merged_df = 
+  left_join(bakers_bakes_df, results_df, by = "baker") |>
+  arrange(series) |>
+  relocate(series)
+print(merged_df)
+```
 
 
