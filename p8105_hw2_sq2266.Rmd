@@ -1,11 +1,11 @@
 ---
 title: "p8105_hw2_sq2266"
+author: "Sihan Qiu"
 output: github_document
-written by: Sihan Qiu
 ---
 
 
-## create a subdirectory to store the local data files, and use relative paths to access these data files?
+
 
 ```{r setup}
 library(tidyverse)
@@ -41,53 +41,37 @@ This dataset includes information of subway stations in New York City. Key varia
 
 
 ## Problem 2
-clean and read data
+### cleaning and reading data
 ```{r}
-wheel1_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 1, na = c("NA",".","")) |>
+mr_trash_df = 
+  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 1, na = c("NA",".","")) |>
   janitor::clean_names() |>
-  filter(homes_powered !=0.00) |>
   select(-x15, -x16) |>
   mutate(sports_balls = as.integer(round(sports_balls,0))) |>
-  pivot_longer(
-    cols = plastic_bottles:homes_powered,
-    names_to = "trash_type",
-    values_to = "amount"
-  )
-  print(wheel1_df)
+  mutate(trash_wheel = "Mr. Trash Wheel") |>
+  relocate(trash_wheel)
 ```
 
 
-## importing Professor Trash Wheel and Gwynnda
+### cleaning Professor Trash Wheel and Gwynnda
 ```{r}
-wheel2_df = 
+prof_trash_df = 
   read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA",".","")) |>
   janitor::clean_names() |>
-   pivot_longer(
-    cols = plastic_bottles:homes_powered,
-    names_to = "trash_type",
-    values_to = "amount"
-  )
-print(wheel2_df)
-```
+  mutate(trash_wheel = "Profesor Trash Wheel") |>
+  relocate(trash_wheel)
 
-```{r}
-wheel4_df = 
+Gwy_trash_df = 
   read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 4,na = c("NA",".","")) |>
   janitor::clean_names() |>
-   pivot_longer(
-    cols = plastic_bottles:homes_powered,
-    names_to = "trash_type",
-    values_to = "amount"
-  )
-print(wheel4_df)
+  mutate(trash_wheel = "Gwynnda") |>
+  relocate(trash_wheel)
 ```
 
-## Combining
+### Combining
 ```{r}
 total_trash_df = 
-     left_join(wheel1_df,wheel2_df,wheel4_df, by = "dumpster")
-
+     left_join(mr_trash_df,prof_trash_df,Gwy_trash_df, by = "trash_wheel")
 ```
 
 
