@@ -1,6 +1,7 @@
 ---
 title: "p8105_hw2_sq2266"
 output: github_document
+written by: Sihan Qiu
 ---
 
 
@@ -12,8 +13,6 @@ library(readxl)
 ```
 
 ## Problem 1
-
-
 ```{r}
 transit_df = 
   read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv",na = c("NA",".","")) |>
@@ -27,12 +26,7 @@ transit_df =
 print(transit_df)
 ```
 
-
-pivot_longer(
-    route1:route11,
-    names_to = "routes",
-    values_to = "routes_served"
-  )
+## I am trying to combine key variables
 ```{r}
     select(transit_df,line,station_name, station_latitude, route1,route2,route3,route4,route5,route6,route7,route8,route9,route10, entry, vending, entrance_type, ada) |>
 
@@ -43,26 +37,7 @@ print(transit_df)
 Description: 
 This dataset includes information of subway stations in New York City. Key variables includes `division`,`line`, `station_name`, `station_latitude`,`station_longitude`,`routes`, `entry`,`vending`,`entrance_type`, and `ada`. The data cleaning steps includes standardizing column names by using `janitor::clean_names` to make uppercase and lowercase separated, converting `entry` from a character variable to a logical variable. 
 
-```{r}
-transit_df = transit_df |>
-      distinct("station_name", "line") |>
-  nrow()
-```
 
-```{r}
-ada_compliant_stations = transit_df |>
-  filter(ada == "YES") |>
-  distinct(station_name, line) |>
-  nrow()
-```
-
-```{r}
-entrance_df= transit_df |>
-  filter(vending == "NO") |>
-  pull(proportion)
-
-print(entrance_df)
-```
 
 
 ## Problem 2
