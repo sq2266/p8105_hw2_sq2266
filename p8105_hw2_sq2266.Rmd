@@ -15,11 +15,24 @@ library(readxl)
 
 
 ```{r}
-transit_df = read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv")
-transit_df = janitor::clean_names(transit_df)
+transit_df = 
+  read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv",na = c("NA",".","")) |>
+  janitor::clean_names() |>
+  mutate(entry = case_match(
+    entry,
+    "YES" ~ "TRUE",
+    "NO" ~ "FALSE"
+  )
+  )
 print(transit_df)
 ```
 
+
+pivot_longer(
+    route1:route11,
+    names_to = "routes",
+    values_to = "routes_served"
+  )
 ```{r}
     select(transit_df,line,station_name, station_latitude, route1,route2,route3,route4,route5,route6,route7,route8,route9,route10, entry, vending, entrance_type, ada) |>
 
