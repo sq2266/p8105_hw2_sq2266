@@ -15,8 +15,12 @@ library(readxl)
 ## Problem 1
 ```{r}
 transit_df = 
-  read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv",na = c("NA",".","")) |>
+  read_csv("NYC_Transit_Subway_Entrance_And_Exit_Data.csv",col_types = cols(Route8 = "c", Route9 = "c", Route10 = "c", Route11 = "c")) |>
   janitor::clean_names() |>
+  select(
+    line, station_name, station_latitude, station_longitude, 
+    starts_with("route"), entry, exit_only, vending, entrance_type, 
+    ada) |> 
   mutate(entry = case_match(
     entry,
     "YES" ~ "TRUE",
@@ -28,9 +32,14 @@ print(transit_df)
 
 ## Trying to combine key variables
 ```{r}
-    select(transit_df,line,station_name, station_latitude, route1,route2,route3,route4,route5,route6,route7,route8,route9,route10, entry, vending, entrance_type, ada) |>
-
-print(transit_df)
+ transit_df |> 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_num",
+    values_to = "route") |> 
+  filter(route == "A") |> 
+  select(station_name, line) |> 
+  distinct()
 ```
 
 
@@ -44,30 +53,34 @@ This dataset includes information of subway stations in New York City. Key varia
 ### Cleaning and reading data
 ```{r}
 mr_trash_df = 
-  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 1, na = c("NA",".","")) |>
+  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 1, skip = 1) |>
   janitor::clean_names() |>
   select(-x15, -x16) |>
   mutate(year=as.character(year)) |>
   mutate(sports_balls = as.integer(round(sports_balls,0))) |>
   mutate(trash_wheel = "Mr. Trash Wheel") |>
-  relocate(trash_wheel)
+  filter(!is.na(dumpster)) |>
+  relocate(trash_wheel) 
 ```
-
 
 ### Cleaning Professor Trash Wheel and Gwynnda
 ```{r}
 prof_trash_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA",".","")) |>
+  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 2, na = c("NA",".",""),skip = 1) |>
   janitor::clean_names() |>
   mutate(trash_wheel = "Profesor Trash Wheel") |>
   mutate(year=as.character(year)) |>
+  filter(!is.na(dumpster),!is.na(date)) |>
   relocate(trash_wheel)
+```
 
+```{r}
 Gwy_trash_df = 
-  read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 4,na = c("NA",".","")) |>
+  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 4,na = c("NA",".","")) |>
   janitor::clean_names() |>
   mutate(trash_wheel = "Gwynnda") |>
   mutate(year=as.character(year)) |>
+  filter(!is.na(dumpster)) |>
   relocate(trash_wheel)
 ```
 
@@ -106,6 +119,7 @@ bakers_df =
   rename(age = baker_age) |>
   rename(occupation = baker_occupation) |>
   mutate(series = as.character(series))
+print(bakers_df)
 
 bakes_df = 
   read_csv("gbb_datasets/bakes.csv",na = c("NA",".","")) |>
@@ -113,20 +127,36 @@ bakes_df =
   relocate(baker) |>
   rename(name = baker) |>
   rename(signature = signature_bake) |>
-  mutate(series = as.character(series))
+  mutate(series = as.character(series)) |>
+  mutate(episode =as.character(episode))|>
+  arrange(name)
 
 results_df = 
   read_csv("gbb_datasets/results.csv",na = c("NA",".","")) |>
   janitor::clean_names() |>
   rename(
     result = in_stayed_in_out_eliminated_star_baker_star_baker_winner_series_winner_runner_up_series_runner_up_wd_withdrew) |>
-  slice(-1,-2) |>
   rename(series =x1,episode =x2, name =x3, technical=x4) |>
   relocate(name) |>
+  filter(!is.na(name)) |>
   mutate(series = as.character(series))
 ```
 
-### Checking completness and correctness
+```{r}
+bakes1_df = 
+  read_csv("gbb_datasets/bakes.csv",na = c("NA",".","")) |>
+  janitor::clean_names() 
+```
+
+```{r}
+bakers_bake_df = 
+  inner_join(bakers_df, bakes_df)
+
+merged_df = 
+  inner_join(bakers_bake_df, results_df) 
+```
+
+### Checking completness and correctness ?
 ```{r}
 missing_bakers_in_bake_df = 
   anti_join(bakers_df, bakes_df, by=c("name"))
@@ -136,29 +166,14 @@ missing_brakers_in_results_df =
 
 ### Combining datasets
 ```{r}
-combined_df = bakers_df |>
-  left_join(results_df, by = c("name", "series")) |>
-  left_join(bakes_df, by = c("name", "series", "episode"))
+
 ```
 
 
-```{r}
-merged_df = bakers_df |>
-  left_join(bakes_df, by = "baker") |>
-  left_join(results_df,by = "baker")
-```
-
-```{r}
-merge_df = 
-  left_join(bakers_bakes_df, results_df, by = "baker") |>
-  arrange(series) |>
-  relocate(series)
-print(merged_df)
-```
 
 ### Create a reader-friendly table
 ```{r}
-
+star_baker_df = 
 ```
 
 
