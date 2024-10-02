@@ -47,6 +47,7 @@ mr_trash_df =
   read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 1, na = c("NA",".","")) |>
   janitor::clean_names() |>
   select(-x15, -x16) |>
+  mutate(year=as.character(year)) |>
   mutate(sports_balls = as.integer(round(sports_balls,0))) |>
   mutate(trash_wheel = "Mr. Trash Wheel") |>
   relocate(trash_wheel)
@@ -59,20 +60,27 @@ prof_trash_df =
   read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA",".","")) |>
   janitor::clean_names() |>
   mutate(trash_wheel = "Profesor Trash Wheel") |>
+  mutate(year=as.character(year)) |>
   relocate(trash_wheel)
 
 Gwy_trash_df = 
   read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 4,na = c("NA",".","")) |>
   janitor::clean_names() |>
   mutate(trash_wheel = "Gwynnda") |>
+  mutate(year=as.character(year)) |>
   relocate(trash_wheel)
 ```
 
-### Combining
+### Combining dataset
 ```{r}
 total_trash_df = 
-     left_join(mr_trash_df,prof_trash_df,Gwy_trash_df, by = "trash_wheel")
+  bind_rows(mr_trash_df,prof_trash_df,Gwy_trash_df) |>
+  janitor::clean_names()
 ```
+
+### Data description
+
+The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,), 
 
 
 ```{r}
