@@ -26,7 +26,7 @@ transit_df =
 print(transit_df)
 ```
 
-## I am trying to combine key variables
+## Trying to combine key variables
 ```{r}
     select(transit_df,line,station_name, station_latitude, route1,route2,route3,route4,route5,route6,route7,route8,route9,route10, entry, vending, entrance_type, ada) |>
 
@@ -41,7 +41,7 @@ This dataset includes information of subway stations in New York City. Key varia
 
 
 ## Problem 2
-### cleaning and reading data
+### Cleaning and reading data
 ```{r}
 mr_trash_df = 
   read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 1, na = c("NA",".","")) |>
@@ -54,7 +54,7 @@ mr_trash_df =
 ```
 
 
-### cleaning Professor Trash Wheel and Gwynnda
+### Cleaning Professor Trash Wheel and Gwynnda
 ```{r}
 prof_trash_df = 
   read_excel("202309 Trash Wheel Collection Data.xlsx", sheet = 2, na = c("NA",".","")) |>
@@ -80,60 +80,98 @@ total_trash_df =
 
 ### Data description
 
-The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,), 
+The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,wrappers,sports ball, and homes powered), also weight, and volume. The total weight of trash collected by Professor Trash Wheel is `pull(prof_trash_df,weight_tons)`. The total number of cigarette butts collected by Gwynnda in June of 2022 is `total_cig_butts_Gwy = sum(cigarette_butts, na.rm = TRUE)`.
 
+### Calculation
+```{r}
+sum(pull(prof_trash_df,weight_tons),na.rm = TRUE)
+```
 
 ```{r}
-Description:
-  
-
+total_trash_df |>
+  filter(trash_wheel == "Gwynnda", month == "June", year == "2022") |>
+  summarise(total_cig_butts_Gwy = sum(cigarette_butts, na.rm = TRUE))
 ```
 
 
 
 ## Problem 3
-create a single, well-organized dataset with all the information contained in these data files
+
+### Importing three datasets
 ```{r}
 bakers_df = 
   read_csv("gbb_datasets/bakers.csv", na = c("NA",".",""))|>
   janitor::clean_names()|>
-  rename(baker = baker_name)
-print(bakers_df)
-```
+  rename(name = baker_name) |>
+  rename(age = baker_age) |>
+  rename(occupation = baker_occupation) |>
+  mutate(series = as.character(series))
 
-```{r}
 bakes_df = 
-  read_csv("gbb_datasets/bakes.csv",na = c("NA",".",""))
-  janitor::clean_names()
-print(bakes_df)
-```
+  read_csv("gbb_datasets/bakes.csv",na = c("NA",".","")) |>
+  janitor::clean_names() |>
+  relocate(baker) |>
+  rename(name = baker) |>
+  rename(signature = signature_bake) |>
+  mutate(series = as.character(series))
 
-
-```{r}
 results_df = 
   read_csv("gbb_datasets/results.csv",na = c("NA",".","")) |>
   janitor::clean_names() |>
   rename(
-    result = in_stayed_in_out_eliminated_star_baker_star_baker_winner_series_winner_runner_up_series_runner_up_wd_withdrew
-    
-  )
-  
-print(results_df)
+    result = in_stayed_in_out_eliminated_star_baker_star_baker_winner_series_winner_runner_up_series_runner_up_wd_withdrew) |>
+  slice(-1,-2) |>
+  rename(series =x1,episode =x2, name =x3, technical=x4) |>
+  relocate(name) |>
+  mutate(series = as.character(series))
 ```
 
-## combining datasets
+### Checking completness and correctness
 ```{r}
-bakers_bakes_df = 
-  left_join(bakers_df, bakes_df, by = "baker")
-print(bakers_bakes_df)
+missing_bakers_in_bake_df = 
+  anti_join(bakers_df, bakes_df, by=c("name"))
+missing_brakers_in_results_df =
+  anti_join(bakers_df, results_df, by=c("name"))
+```
+
+### Combining datasets
+```{r}
+combined_df = bakers_df |>
+  left_join(results_df, by = c("name", "series")) |>
+  left_join(bakes_df, by = c("name", "series", "episode"))
+```
+
+
+```{r}
+merged_df = bakers_df |>
+  left_join(bakes_df, by = "baker") |>
+  left_join(results_df,by = "baker")
 ```
 
 ```{r}
-merged_df = 
+merge_df = 
   left_join(bakers_bakes_df, results_df, by = "baker") |>
   arrange(series) |>
   relocate(series)
 print(merged_df)
+```
+
+### Create a reader-friendly table
+```{r}
+
+```
+
+
+### Importing viewer.csv
+```{r}
+viewer_df = 
+  read_csv("gbb_datasets/viewers.csv",na = c("NA",".",""))
+  janitor::clean_names()
+```
+
+```{r}
+  mean(pull(viewer_df,"Series 1"),na.rm = TRUE) 
+  mean(pull(viewer_df,"Series 5"),na.rm = TRUE) 
 ```
 
 
