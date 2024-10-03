@@ -93,7 +93,7 @@ total_trash_df =
 
 ### Data description
 
-The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,wrappers,sports ball, and homes powered), also weight, and volume. The total weight of trash collected by Professor Trash Wheel is `pull(prof_trash_df,weight_tons)`. The total number of cigarette butts collected by Gwynnda in June of 2022 is `total_cig_butts_Gwy = sum(cigarette_butts, na.rm = TRUE)`.
+The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,wrappers,sports ball, and homes powered), also weight, and volume. The total weight of trash collected by Professor Trash Wheel is 246.74. The total number of cigarette butts collected by Gwynnda in June of 2022 is 18120.
 
 ### Calculation
 ```{r}
@@ -118,43 +118,51 @@ bakers_df =
   rename(name = baker_name) |>
   rename(age = baker_age) |>
   rename(occupation = baker_occupation) |>
-  mutate(series = as.character(series))
-print(bakers_df)
+  mutate(series = as.character(series)) |>
+  mutate(first_name = word(name, 1))
+```
 
+```{r}
 bakes_df = 
   read_csv("gbb_datasets/bakes.csv",na = c("NA",".","")) |>
   janitor::clean_names() |>
+  mutate(baker = str_replace_all(baker, '"', "")) |>
   relocate(baker) |>
   rename(name = baker) |>
   rename(signature = signature_bake) |>
   mutate(series = as.character(series)) |>
   mutate(episode =as.character(episode))|>
   arrange(name)
+```
 
+```{r}
 results_df = 
-  read_csv("gbb_datasets/results.csv",na = c("NA",".","")) |>
+  read_csv("gbb_datasets/results.csv",na = c("NA",".",""),skip=2) |>
   janitor::clean_names() |>
-  rename(
-    result = in_stayed_in_out_eliminated_star_baker_star_baker_winner_series_winner_runner_up_series_runner_up_wd_withdrew) |>
-  rename(series =x1,episode =x2, name =x3, technical=x4) |>
-  relocate(name) |>
-  filter(!is.na(name)) |>
-  mutate(series = as.character(series))
+  mutate(episode = as.character(episode))|>
+  mutate(baker = str_replace_all(baker, "Joanne", "Jo")) |>
+  rename(name = baker) |>
+  mutate(series = as.character(series)) 
 ```
 
+### Merging datasets
 ```{r}
-bakes1_df = 
-  read_csv("gbb_datasets/bakes.csv",na = c("NA",".","")) |>
-  janitor::clean_names() 
-```
-
-```{r}
-bakers_bake_df = 
-  inner_join(bakers_df, bakes_df)
-
 merged_df = 
-  inner_join(bakers_bake_df, results_df) 
+  bakers_df |>
+  left_join(results_df, by = c("first_name"="name", "series")) |>
+  left_join(bakes_df, by = c("first_name" = "name", "series", 
+                               "episode"))
+write.csv(merged_df,"merged_cleaned_result.csv",row.names = FALSE )
 ```
+
+Description:
+I first imported three datasets. First i imported the baker.csv from the working directory "gbb_datasets", and treated the values "NA", ".", and "" as missing data (NA values). I used janitor::clean_names to clean the column names by converting them to snake_case, making them lowercase, and removing special characters or spaces. Then I rename baker_name to name, baker_age to age, baker_occupation to occupation which helps me to understand. Because in the original dataset, series is a double variable, so i converted it into character variable. I also created a new column "first_name". I used word function to extract the first row from the name. 
+
+Then i imported the bakes.csv from the working directory "gbb_datasets", and treated the values "NA", ".", and "" as missing data (NA values). I used janitor::clean_names to clean the column names by converting them to snake_case, making them lowercase, and removing special characters or spaces. Then I modify baker column to replace all occurrences of the double quote variables, and remove it to the first row. I rename name and signature variables, and converted series and episode into character variables. Then making name alphabetically. I converted variables because I met problems when I first try to merge without converting them into same level. 
+
+I used the same way to clean the results.csv. One different was that I used mutate function to people who named "Joanne" with "Jo". 
+
+I used left_join to merge three dataset by matching "first name" with "name","series" with "series", "episode" with "episode". Then I used write.csv to import the table. In the final dataset, it contains observation `r nrow(merged_df)` with `r ncol(merged_df)` columns. Bakers' name are in alphabetical order. Key variables are hometown, series, episode, occupation, signature, and their final result (in or out of the competition). 
 
 ### Checking completness and correctness ?
 ```{r}
@@ -164,29 +172,29 @@ missing_brakers_in_results_df =
   anti_join(bakers_df, results_df, by=c("name"))
 ```
 
-### Combining datasets
-```{r}
-
-```
-
+Description: 
 
 
 ### Create a reader-friendly table
 ```{r}
-star_baker_df = 
+star_bakers_df = 
+  merged_df |>
+  filter(series >= 5) |>
+  filter(result %in% c("WINNER","STAR BAKER")) |>
+  select(name, series, episode, result)
 ```
 
 
 ### Importing viewer.csv
 ```{r}
 viewer_df = 
-  read_csv("gbb_datasets/viewers.csv",na = c("NA",".",""))
+  read_csv("gbb_datasets/viewers.csv",na = c("NA",".","")) |>
   janitor::clean_names()
 ```
 
 ```{r}
-  mean(pull(viewer_df,"Series 1"),na.rm = TRUE) 
-  mean(pull(viewer_df,"Series 5"),na.rm = TRUE) 
+  mean(pull(viewer_df,"series_1"),na.rm = TRUE) 
+  mean(pull(viewer_df,"series_5"),na.rm = TRUE) 
 ```
 
 
