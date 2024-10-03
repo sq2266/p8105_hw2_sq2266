@@ -76,7 +76,7 @@ prof_trash_df =
 
 ```{r}
 Gwy_trash_df = 
-  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 4,na = c("NA",".","")) |>
+  read_excel("202409 Trash Wheel Collection Data.new.xlsx", sheet = 4,na = c("NA",".",""),skip = 1) |>
   janitor::clean_names() |>
   mutate(trash_wheel = "Gwynnda") |>
   mutate(year=as.character(year)) |>
@@ -93,7 +93,7 @@ total_trash_df =
 
 ### Data description
 
-The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,wrappers,sports ball, and homes powered), also weight, and volume. The total weight of trash collected by Professor Trash Wheel is 246.74. The total number of cigarette butts collected by Gwynnda in June of 2022 is 18120.
+The dataset contains observations on `r nrow(total_trash_df)` three different datasets. The data includes `r ncol(total_trash_df)` variables, including month, year, different types of trash (plastic bottles, polystyrene, cigarette butts, glass bottle, plastic bags,wrappers,sports ball, and homes powered), also weight, and volume. The total weight of trash collected by Professor Trash Wheel is 246.74. The total number of cigarette butts collected by Gwynnda in June of 2022 is 18120. These three datasets were skipped the first row because the first row was picture. 
 
 ### Calculation
 ```{r}
