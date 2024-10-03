@@ -145,6 +145,14 @@ results_df =
   mutate(series = as.character(series)) 
 ```
 
+### Checking completness and correctness 
+```{r}
+missing_bakers_in_bake_df = 
+  anti_join(bakers_df, bakes_df, by=c("first_name"="name","series"))
+missing_brakers_in_results_df =
+  anti_join(bakers_df, results_df, by=c("name","series"))
+```
+
 ### Merging datasets
 ```{r}
 merged_df = 
@@ -164,13 +172,6 @@ I used the same way to clean the results.csv. One different was that I used muta
 
 I used left_join to merge three dataset by matching "first name" with "name","series" with "series", "episode" with "episode". Then I used write.csv to import the table. In the final dataset, it contains observation `r nrow(merged_df)` with `r ncol(merged_df)` columns. Bakers' name are in alphabetical order. Key variables are hometown, series, episode, occupation, signature, and their final result (in or out of the competition). 
 
-### Checking completness and correctness 
-```{r}
-missing_bakers_in_bake_df = 
-  anti_join(bakers_df, bakes_df, by=c("first_name"="name","series"))
-missing_brakers_in_results_df =
-  anti_join(bakers_df, results_df, by=c("name","series"))
-```
 
 ### Create a reader-friendly table
 ```{r}
