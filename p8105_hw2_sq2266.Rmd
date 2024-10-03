@@ -164,16 +164,13 @@ I used the same way to clean the results.csv. One different was that I used muta
 
 I used left_join to merge three dataset by matching "first name" with "name","series" with "series", "episode" with "episode". Then I used write.csv to import the table. In the final dataset, it contains observation `r nrow(merged_df)` with `r ncol(merged_df)` columns. Bakers' name are in alphabetical order. Key variables are hometown, series, episode, occupation, signature, and their final result (in or out of the competition). 
 
-### Checking completness and correctness ?
+### Checking completness and correctness 
 ```{r}
 missing_bakers_in_bake_df = 
-  anti_join(bakers_df, bakes_df, by=c("name"))
+  anti_join(bakers_df, bakes_df, by=c("first_name"="name","series"))
 missing_brakers_in_results_df =
-  anti_join(bakers_df, results_df, by=c("name"))
+  anti_join(bakers_df, results_df, by=c("name","series"))
 ```
-
-Description: 
-
 
 ### Create a reader-friendly table
 ```{r}
@@ -183,18 +180,29 @@ star_bakers_df =
   filter(result %in% c("WINNER","STAR BAKER")) |>
   select(name, series, episode, result)
 ```
+Comments:
+Candince is not a surprising winner. She showed up on 10 episode in series 7, which means she is very good/talented at baking. Nadiya is also a predictable winner because she showed up 9 episodes in series 6, as well as Sophie. Rahul gives surprise because he does not show up as much as other winners do. 
 
 
 ### Importing viewer.csv
 ```{r}
 viewer_df = 
   read_csv("gbb_datasets/viewers.csv",na = c("NA",".","")) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  pivot_longer(
+    series_1:series_10,
+    names_to = "series",
+    values_to = "viewship") |>
+    head(10)
 ```
+
 
 ```{r}
-  mean(pull(viewer_df,"series_1"),na.rm = TRUE) 
-  mean(pull(viewer_df,"series_5"),na.rm = TRUE) 
+view_df = 
+  read_csv("gbb_datasets/viewers.csv",na = c("NA",".","")) |>
+  janitor::clean_names()
+  mean(pull(view_df,"series_1"),na.rm = TRUE) 
+  mean(pull(view_df,"series_5"),na.rm = TRUE) 
 ```
 
-
+The average viewership in Season 1 is 2.77, Season 5 is 10.0393.
